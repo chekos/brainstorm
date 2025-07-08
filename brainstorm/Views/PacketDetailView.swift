@@ -14,16 +14,17 @@ struct PacketDetailView: View {
     @State private var selectedItem: ChecklistItem?
     @State private var showingAddItemSheet = false
     @State private var showingSectionsView = false
+    @State private var showingCaptureHUD = false
     
     var body: some View {
         HSplitView {
-            // Checklist view
-            checklistView
-                .frame(minWidth: 300)
+            // Enhanced checklist view with rich progress cards
+            enhancedChecklistView
+                .frame(minWidth: 350)
             
-            // Detail view
-            detailView
-                .frame(minWidth: 400)
+            // Enhanced detail view
+            enhancedDetailView
+                .frame(minWidth: 450)
         }
         .navigationTitle(packet.title)
         .toolbar {
@@ -32,9 +33,13 @@ struct PacketDetailView: View {
                     Label("Add Item", systemImage: "plus")
                 }
                 
+                Button(action: { showingCaptureHUD = true }) {
+                    Label("Capture", systemImage: "mic.and.signal.meter")
+                }
+                
                 if !packet.sections.isEmpty {
                     Button(action: { showingSectionsView = true }) {
-                        Label("View Sections (\(packet.sections.count))", systemImage: "doc.text")
+                        Label("Sections (\(packet.sections.count))", systemImage: "doc.text")
                     }
                 }
             }
@@ -44,6 +49,51 @@ struct PacketDetailView: View {
         }
         .sheet(isPresented: $showingSectionsView) {
             PacketSectionsView(packet: packet)
+        }
+        .sheet(isPresented: $showingCaptureHUD) {
+            // TODO: Add CaptureHUD integration
+            Text("Capture HUD")
+        }
+    }
+    
+    private var enhancedChecklistView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Overview card
+            ScrollView {
+                VStack(spacing: 16) {
+                    PacketOverviewCard(packet: packet)
+                        .padding(.horizontal)
+                        .padding(.top)
+                    
+                    // Rich progress cards
+                    LazyVStack(spacing: 12) {
+                        ForEach(sortedItems) { item in
+                            RichProgressCard(
+                                item: item,
+                                packet: packet,
+                                isSelected: selectedItem?.id == item.id,
+                                onSelect: { selectedItem = item }
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                }
+            }
+        }
+    }
+    
+    private var enhancedDetailView: some View {
+        VStack {
+            if let item = selectedItem {
+                EnhancedItemDetailView(item: item, packet: packet)
+            } else {
+                EmptyStateView(
+                    title: "Select an Item",
+                    description: "Choose an item from the progress cards to view its details, add notes, and track your progress.",
+                    systemImage: "checkmark.circle.dashed"
+                )
+            }
         }
     }
     
