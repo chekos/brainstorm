@@ -26,11 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Capture HUD for managing all capture modes and permissions
 - Global hotkey service using Carbon Event Manager
 - Multi-modal capture linking to packets and checklist items
+- Rich progress cards with interactive visual design and status indicators
+- Enhanced packet overview cards with comprehensive statistics and quick actions
+- AI-powered PDF parsing with OpenAI GPT-4o integration
+- AI Settings interface for API key configuration and service management
+- Smart AI service routing with fallback to mock service
+- Comprehensive typography and spacing improvements for better readability
 
 ### Changed
 - Replaced basic Item model with comprehensive feature-ready data models
 - Updated ContentView to use new MainNavigationView
 - Enhanced navigation with sidebar packet list and status tracking
+- Upgraded typography scale from caption-heavy fonts to proper readable hierarchy
+- Improved spacing and padding across all UI components for better visual clarity
+- Enhanced visual hierarchy in progress cards and detail views
 
 ### Fixed
 - Build configuration issues for local development without Apple Developer account
@@ -41,6 +50,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HotkeyService Carbon API type conversion errors for global shortcuts
 - SwiftData import issues in CaptureHUD for FetchDescriptor usage
 - @MainActor isolation for SFSpeechRecognizerDelegate protocol compliance
+- Critical UI readability issues with extremely small, hard-to-read text throughout interface
+- Layout frame constraints preventing proper space utilization in PacketDetailView
+- Missing AI Settings button visibility in main navigation sidebar
+- Memory management crashes during CaptureHUD service initialization
+- Privacy permissions for speech recognition and microphone access
+- SwiftData relationship management crashes in PDF import workflow
 
 ### Removed
 - Basic Item.swift model (replaced with comprehensive models)
