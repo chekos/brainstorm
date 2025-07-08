@@ -12,7 +12,10 @@ import SwiftData
 struct brainstormApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Packet.self,
+            PacketSection.self,
+            ChecklistItem.self,
+            Capture.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -26,6 +29,7 @@ struct brainstormApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.serviceContainer, ServiceContainer(modelContext: sharedModelContainer.mainContext))
         }
         .modelContainer(sharedModelContainer)
     }
