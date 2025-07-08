@@ -11,6 +11,7 @@ import SwiftData
 struct PacketDetailView: View {
     let packet: Packet
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.serviceContainer) private var serviceContainer
     @State private var selectedItem: ChecklistItem?
     @State private var showingAddItemSheet = false
     @State private var showingSectionsView = false
@@ -51,8 +52,17 @@ struct PacketDetailView: View {
             PacketSectionsView(packet: packet)
         }
         .sheet(isPresented: $showingCaptureHUD) {
-            // TODO: Add CaptureHUD integration
-            Text("Capture HUD")
+            if let serviceContainer = serviceContainer {
+                CaptureHUD(
+                    voiceService: serviceContainer.voiceService,
+                    screenClipService: serviceContainer.screenClipService,
+                    brainstormService: serviceContainer.brainstormService,
+                    hotkeyService: serviceContainer.hotkeyService
+                )
+            } else {
+                Text("Service container not available")
+                    .foregroundColor(.secondary)
+            }
         }
     }
     

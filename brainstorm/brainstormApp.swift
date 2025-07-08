@@ -29,8 +29,13 @@ struct brainstormApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.serviceContainer, ServiceContainer(modelContext: sharedModelContainer.mainContext))
+                .environment(\.serviceContainer, createServiceContainer())
         }
         .modelContainer(sharedModelContainer)
+    }
+    
+    @MainActor
+    private func createServiceContainer() -> ServiceContainer {
+        return ServiceContainer(modelContext: sharedModelContainer.mainContext)
     }
 }
