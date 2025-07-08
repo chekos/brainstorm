@@ -17,22 +17,32 @@ class ServiceContainer: ObservableObject {
     let screenClipService: ScreenClipService
     let brainstormService: BrainstormService
     let hotkeyService: HotkeyService
-    
-    // Future services will be added here:
-    // let aiService: AIService
+    let aiService: AIServiceRouter
     
     init(modelContext: ModelContext) {
         self.dataService = DataService(modelContext: modelContext)
+        self.aiService = AIServiceRouter()
         self.pdfService = PDFService(modelContext: modelContext)
         self.voiceService = VoiceService()
         self.screenClipService = ScreenClipService()
         self.brainstormService = BrainstormService()
         self.hotkeyService = HotkeyService()
         
-        // Wire up services
-        self.hotkeyService.voiceService = voiceService
-        self.hotkeyService.screenClipService = screenClipService
-        self.hotkeyService.brainstormService = brainstormService
+        // Wire up services directly - we're already on MainActor
+        self.hotkeyService.voiceService = self.voiceService
+        self.hotkeyService.screenClipService = self.screenClipService
+        self.hotkeyService.brainstormService = self.brainstormService
+    }
+    
+    deinit {
+        // Clean up services when container is deallocated
+        // Note: deinit runs on whatever thread the object is being deallocated on
+        // Since HotkeyService is @MainActor, we need to be careful about cleanup
+        Task { @MainActor in
+            hotkeyService.voiceService = nil
+            hotkeyService.screenClipService = nil
+            hotkeyService.brainstormService = nil
+        }
     }
 }
 

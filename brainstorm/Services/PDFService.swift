@@ -12,9 +12,11 @@ import SwiftData
 @MainActor
 class PDFService: ObservableObject {
     private let modelContext: ModelContext
+    private let aiService: AIServiceRouter
     
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
+        self.aiService = AIServiceRouter()
     }
     
     // MARK: - PDF Import
@@ -34,12 +36,18 @@ class PDFService: ObservableObject {
         let packet = Packet(title: title, sourceURL: url, originalFilename: filename)
         
         do {
-            // Parse PDF content
-            let sections = try await parsePDFDocument(pdfDocument)
+            // Extract raw text from PDF
+            let rawText = extractRawText(from: pdfDocument)
+            
+            // Use AI to analyze document
+            let analysis = try await aiService.analyzeDocument(rawText, title: title)
+            
+            // Create sections from AI analysis
+            let sections = createSectionsFromAnalysis(analysis)
             packet.sections = sections
             
-            // Generate checklist items
-            let checklistItems = generateChecklistItems(from: sections, packet: packet)
+            // Generate intelligent checklist items
+            let checklistItems = createChecklistItemsFromAnalysis(analysis)
             packet.checklistItems = checklistItems
             
             // Save to context
@@ -52,86 +60,110 @@ class PDFService: ObservableObject {
         }
     }
     
-    // MARK: - PDF Parsing
+    // MARK: - PDF Text Extraction
     
-    private func parsePDFDocument(_ document: PDFDocument) async throws -> [PacketSection] {
-        var sections: [PacketSection] = []
+    private func extractRawText(from document: PDFDocument) -> String {
+        var fullText = ""
         let pageCount = document.pageCount
         
         for pageIndex in 0..<pageCount {
             guard let page = document.page(at: pageIndex) else { continue }
             guard let pageContent = page.string else { continue }
             
-            let pageNumber = pageIndex + 1
-            let pageSections = parsePageContent(pageContent, pageNumber: pageNumber)
-            sections.append(contentsOf: pageSections)
+            fullText += "\n=== Page \(pageIndex + 1) ===\n"
+            fullText += pageContent
+            fullText += "\n"
         }
         
-        return sections
+        return fullText
     }
     
-    private func parsePageContent(_ content: String, pageNumber: Int) -> [PacketSection] {
+    // MARK: - AI Analysis Integration
+    
+    private func createSectionsFromAnalysis(_ analysis: DocumentAnalysis) -> [PacketSection] {
         var sections: [PacketSection] = []
-        let lines = content.components(separatedBy: .newlines)
-        var currentContent: [String] = []
-        var currentTitle: String?
-        var sectionOrder = 0
+        var order = 0
         
-        for line in lines {
-            let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            if trimmedLine.isEmpty { continue }
-            
-            // Detect headings using various heuristics
-            if isHeading(trimmedLine) {
-                // Save previous section if exists
-                if let title = currentTitle, !currentContent.isEmpty {
-                    let section = PacketSection(
-                        title: title,
-                        content: currentContent.joined(separator: "\n"),
-                        pageReference: "p. \(pageNumber)",
-                        sectionType: .heading,
-                        order: sectionOrder
-                    )
-                    sections.append(section)
-                    sectionOrder += 1
-                }
-                
-                // Start new section
-                currentTitle = trimmedLine
-                currentContent = []
-            } else {
-                // Add to current content
-                currentContent.append(trimmedLine)
-            }
+        // Create overview section
+        let overviewSection = PacketSection(
+            title: "Document Overview",
+            content: analysis.summary,
+            pageReference: "p. 1",
+            sectionType: .content,
+            order: order
+        )
+        sections.append(overviewSection)
+        order += 1
+        
+        // Create sections for main topics
+        for topic in analysis.mainTopics {
+            let topicSection = PacketSection(
+                title: topic.name,
+                content: topic.description,
+                pageReference: topic.pageReference,
+                sectionType: .heading,
+                order: order
+            )
+            sections.append(topicSection)
+            order += 1
         }
         
-        // Save final section
-        if let title = currentTitle, !currentContent.isEmpty {
-            let section = PacketSection(
-                title: title,
-                content: currentContent.joined(separator: "\n"),
-                pageReference: "p. \(pageNumber)",
+        // Create sections for key concepts
+        if !analysis.concepts.isEmpty {
+            let conceptsContent = analysis.concepts.map { concept in
+                "**\(concept.name)**: \(concept.definition)\n\n*Importance*: \(concept.importance)"
+            }.joined(separator: "\n\n")
+            
+            let conceptsSection = PacketSection(
+                title: "Key Concepts",
+                content: conceptsContent,
+                pageReference: nil,
                 sectionType: .content,
-                order: sectionOrder
+                order: order
             )
-            sections.append(section)
-        } else if !currentContent.isEmpty {
-            // Content without heading
-            let section = PacketSection(
-                title: "Page \(pageNumber) Content",
-                content: currentContent.joined(separator: "\n"),
-                pageReference: "p. \(pageNumber)",
+            sections.append(conceptsSection)
+            order += 1
+        }
+        
+        // Create timeline section if we have dates
+        if !analysis.keyDates.isEmpty {
+            let timelineContent = analysis.keyDates.map { date in
+                "**\(date.date)**: \(date.event)\n\(date.significance)"
+            }.joined(separator: "\n\n")
+            
+            let timelineSection = PacketSection(
+                title: "Timeline",
+                content: timelineContent,
+                pageReference: nil,
                 sectionType: .content,
-                order: sectionOrder
+                order: order
             )
-            sections.append(section)
+            sections.append(timelineSection)
+            order += 1
+        }
+        
+        // Create figures section if we have important people
+        if !analysis.importantFigures.isEmpty {
+            let figuresContent = analysis.importantFigures.map { figure in
+                "**\(figure.name)** (\(figure.timeframe ?? "Unknown period"))\n*Role*: \(figure.role)\n*Significance*: \(figure.significance)"
+            }.joined(separator: "\n\n")
+            
+            let figuresSection = PacketSection(
+                title: "Important Figures",
+                content: figuresContent,
+                pageReference: nil,
+                sectionType: .content,
+                order: order
+            )
+            sections.append(figuresSection)
+            order += 1
         }
         
         return sections
     }
     
-    // MARK: - Heading Detection
+    // MARK: - Legacy Heading Detection (Backup)
+    // Kept for fallback when AI service is unavailable
     
     private func isHeading(_ text: String) -> Bool {
         let line = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -176,49 +208,41 @@ class PDFService: ObservableObject {
         return false
     }
     
-    // MARK: - Checklist Generation
+    // MARK: - AI-Powered Checklist Generation
     
-    private func generateChecklistItems(from sections: [PacketSection], packet: Packet) -> [ChecklistItem] {
+    private func createChecklistItemsFromAnalysis(_ analysis: DocumentAnalysis) -> [ChecklistItem] {
         var items: [ChecklistItem] = []
         var order = 0
         
-        // Group sections by type and importance
-        let headings = sections.filter { $0.sectionType == .heading }
-        
-        for heading in headings {
+        // Create checklist items from AI-generated study tasks
+        for task in analysis.studyTasks {
             let item = ChecklistItem(
-                title: heading.title,
-                pageReference: heading.pageReference,
+                title: task.title,
+                pageReference: task.pageReference,
                 order: order
             )
-            item.packet = packet
+            // Add task details to notes if available
+            if !task.description.isEmpty {
+                item.notes = task.description
+            }
             items.append(item)
             order += 1
         }
         
-        // If no clear headings, create items based on content sections
+        // Ensure we have at least some items
         if items.isEmpty {
-            let contentSections = sections.filter { $0.sectionType == .content }
-            for section in contentSections.prefix(10) { // Limit to prevent overwhelming lists
+            // Fallback to topic-based items
+            for topic in analysis.mainTopics {
                 let item = ChecklistItem(
-                    title: section.title,
-                    pageReference: section.pageReference,
+                    title: "Study \(topic.name)",
+                    pageReference: topic.pageReference,
                     order: order
                 )
-                item.packet = packet
+                item.notes = topic.description
                 items.append(item)
                 order += 1
             }
         }
-        
-        // Add a completion item
-        let completionItem = ChecklistItem(
-            title: "Review and summarize key findings",
-            pageReference: nil,
-            order: order
-        )
-        completionItem.packet = packet
-        items.append(completionItem)
         
         return items
     }

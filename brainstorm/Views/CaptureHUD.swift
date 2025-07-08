@@ -18,11 +18,44 @@ struct CaptureHUD: View {
     @State private var showingLinkingSheet = false
     @State private var selectedCapture: Capture?
     @State private var availablePackets: [Packet] = []
+    @State private var isInitialized = false
     
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
+        VStack(spacing: 20) {
+            if !isInitialized {
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                    Text("Initializing capture services...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+            } else {
+                captureContent
+            }
+        }
+        .padding()
+        .frame(width: 400, height: 600)
+        .onAppear {
+            Task {
+                await initializeServices()
+            }
+        }
+        .alert("Permissions Required", isPresented: $showingVoicePermissionAlert) {
+            Button("Open Settings") {
+                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone")!)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Voice notes require microphone and speech recognition permissions. Please enable them in System Settings.")
+        }
+    }
+    
+    private var captureContent: some View {
         VStack(spacing: 20) {
             // Voice Capture Section
             VStack(spacing: 12) {
@@ -63,7 +96,8 @@ struct CaptureHUD: View {
                     }
                 }
                 
-                if voiceService.isRecording {
+                // Only show if services are initialized and safe to access
+                if isInitialized && voiceService.isRecording {
                     VoiceRecordingView(
                         transcription: voiceService.lastTranscription,
                         duration: voiceService.currentRecordingDuration,
@@ -111,13 +145,13 @@ struct CaptureHUD: View {
                         }
                 }
                 
-                if screenClipService.isClipping {
+                if isInitialized && screenClipService.isClipping {
                     Text("Select area to capture...")
                         .foregroundColor(.secondary)
                         .font(.caption)
                 }
                 
-                if let clipImage = screenClipService.lastClipImage {
+                if isInitialized, let clipImage = screenClipService.lastClipImage {
                     ScreenClipResultView(
                         image: clipImage,
                         ocrText: screenClipService.lastOCRText,
@@ -162,13 +196,13 @@ struct CaptureHUD: View {
                         }
                 }
                 
-                if brainstormService.isActive {
+                if isInitialized && brainstormService.isActive {
                     Text("Brainstorm session active")
                         .foregroundColor(.purple)
                         .font(.caption)
                 }
                 
-                if !brainstormService.lastCapturedThought.isEmpty {
+                if isInitialized && !brainstormService.lastCapturedThought.isEmpty {
                     BrainstormResultView(
                         thought: brainstormService.lastCapturedThought,
                         sessionDuration: brainstormService.sessionDuration,
@@ -197,20 +231,19 @@ struct CaptureHUD: View {
                 }
             }
         }
-        .padding()
-        .frame(width: 400, height: 600)
-        .alert("Permissions Required", isPresented: $showingVoicePermissionAlert) {
-            Button("Open Settings") {
-                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone")!)
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Voice notes require microphone and speech recognition permissions. Please enable them in System Settings.")
-        }
-        .onAppear {
+    }
+    
+    private func initializeServices() async {
+        // Simple initialization with proper wiring
+        await MainActor.run {
             hotkeyService.voiceService = voiceService
             hotkeyService.screenClipService = screenClipService
             hotkeyService.brainstormService = brainstormService
+            
+            // Small delay to ensure services are ready
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isInitialized = true
+            }
         }
     }
 }

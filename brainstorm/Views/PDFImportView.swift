@@ -35,7 +35,8 @@ struct PDFImportView: View {
                 failedView(error: error)
             }
         }
-        .padding()
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private func importingView(filename: String) -> some View {
@@ -54,75 +55,101 @@ struct PDFImportView: View {
     }
     
     private func completedView(packet: Packet) -> some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
+            Spacer()
+            
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 48))
+                .font(.system(size: 64))
                 .foregroundColor(.green)
             
             Text("Import Successful!")
-                .font(.title2)
+                .font(.title)
                 .fontWeight(.medium)
             
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Packet:")
                         .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                    Spacer()
                     Text(packet.title)
+                        .fontWeight(.medium)
                 }
                 
                 HStack {
                     Text("Sections:")
                         .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                    Spacer()
                     Text("\(packet.sections.count)")
+                        .fontWeight(.medium)
                 }
                 
                 HStack {
                     Text("Checklist Items:")
                         .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                    Spacer()
                     Text("\(packet.checklistItems.count)")
+                        .fontWeight(.medium)
                 }
             }
-            .padding()
+            .padding(16)
             .background(Color(NSColor.controlBackgroundColor))
-            .cornerRadius(8)
+            .cornerRadius(12)
+            .frame(maxWidth: 400)
             
-            HStack {
+            Spacer()
+            
+            HStack(spacing: 12) {
                 Button("Import Another") {
                     resetImport()
                 }
                 .buttonStyle(.bordered)
+                .controlSize(.large)
                 
                 Button("Open Packet") {
                     onPacketImported(packet)
                 }
                 .buttonStyle(.borderedProminent)
+                .controlSize(.large)
             }
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private func failedView(error: String) -> some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
+            Spacer()
+            
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 48))
+                .font(.system(size: 64))
                 .foregroundColor(.orange)
             
             Text("Import Failed")
-                .font(.title2)
+                .font(.title)
                 .fontWeight(.medium)
             
             Text(error)
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-                .padding()
+                .padding(16)
                 .background(Color(NSColor.controlBackgroundColor))
-                .cornerRadius(8)
+                .cornerRadius(12)
+                .frame(maxWidth: 400)
+            
+            Spacer()
             
             Button("Try Again") {
                 resetImport()
             }
             .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -164,5 +191,5 @@ enum ImportState {
     PDFImportView { packet in
         print("Imported packet: \(packet.title)")
     }
-    .frame(width: 500, height: 400)
+    .frame(width: 600, height: 500)
 }

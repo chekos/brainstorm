@@ -6,5 +6,9 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>brainstorm uses speech recognition to convert your voice notes into text for study packets and brainstorm sessions.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>brainstorm needs microphone access to record voice notes and capture your thoughts during study sessions.</string>
 </dict>
 </plist>
