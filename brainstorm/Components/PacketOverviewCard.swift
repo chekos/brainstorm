@@ -19,15 +19,15 @@ struct PacketOverviewCard: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(packet.title)
-                            .font(.title2.weight(.semibold))
+                            .font(.title.weight(.semibold))
                             .lineLimit(2)
                         
                         if let sourceURL = packet.sourceURL {
                             HStack(spacing: 4) {
                                 Image(systemName: "doc.fill")
-                                    .font(.caption2)
-                                Text(sourceURL.lastPathComponent)
                                     .font(.caption)
+                                Text(sourceURL.lastPathComponent)
+                                    .font(.subheadline)
                             }
                             .foregroundColor(.secondary)
                         }
@@ -42,12 +42,12 @@ struct PacketOverviewCard: View {
                 // Timestamps
                 HStack {
                     Text("Created \(packet.createdAt, style: .relative)")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundColor(.secondary)
                     
                     if packet.modifiedAt != packet.createdAt {
                         Text("• Updated \(packet.modifiedAt, style: .relative)")
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundColor(.secondary)
                     }
                     
@@ -94,12 +94,12 @@ struct PacketOverviewCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Progress")
-                    .font(.headline)
+                    .font(.title3.weight(.medium))
                 
                 Spacer()
                 
                 Text("\(completedItems)/\(totalItems) items")
-                    .font(.subheadline.weight(.medium))
+                    .font(.headline.weight(.medium))
                     .foregroundColor(.secondary)
             }
             
@@ -121,14 +121,14 @@ struct PacketOverviewCard: View {
             // Progress percentage
             HStack {
                 Text("\(Int(packet.progress * 100))% complete")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
                 if packet.progress > 0 && packet.progress < 1 {
                     Text("\(remainingItems) remaining")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
             }
@@ -166,7 +166,7 @@ struct PacketOverviewCard: View {
     private var quickActions: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Quick Actions")
-                .font(.subheadline.weight(.medium))
+                .font(.headline.weight(.medium))
                 .foregroundColor(.secondary)
             
             HStack(spacing: 12) {
@@ -274,14 +274,14 @@ struct OverviewStatCard: View {
             }
             
             Text(value)
-                .font(.title3.weight(.semibold))
+                .font(.title2.weight(.semibold))
                 .foregroundColor(.primary)
             
             Text(title)
-                .font(.caption2)
+                .font(.caption)
                 .foregroundColor(.secondary)
         }
-        .padding(12)
+        .padding(16)
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 8)
@@ -302,13 +302,13 @@ struct ActionButton: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.caption)
+                    .font(.subheadline)
                 Text(title)
-                    .font(.caption.weight(.medium))
+                    .font(.subheadline.weight(.medium))
             }
             .foregroundColor(isEnabled ? color : .secondary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(isEnabled ? color.opacity(0.15) : Color(NSColor.separatorColor))

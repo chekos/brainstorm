@@ -81,22 +81,22 @@ struct EnhancedItemDetailView: View {
             HStack(spacing: 16) {
                 Label {
                     Text("Created \(item.createdAt, style: .relative)")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                 } icon: {
                     Image(systemName: "plus.circle")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundColor(.secondary)
                 }
                 
                 if item.modifiedAt != item.createdAt {
                     Label {
                         Text("Updated \(item.modifiedAt, style: .relative)")
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
                     } icon: {
                         Image(systemName: "pencil.circle")
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
@@ -104,11 +104,11 @@ struct EnhancedItemDetailView: View {
                 if let completedAt = item.completedAt {
                     Label {
                         Text("Completed \(completedAt, style: .relative)")
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundColor(.green)
                     } icon: {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundColor(.green)
                     }
                 }
@@ -122,7 +122,7 @@ struct EnhancedItemDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Status")
-                    .font(.headline)
+                    .font(.title3.weight(.medium))
                 
                 Spacer()
                 
@@ -149,16 +149,16 @@ struct EnhancedItemDetailView: View {
             // Status-specific content
             if item.status == .blocked {
                 Text("This item is blocked. Consider what's preventing progress and update your approach.")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundColor(.orange)
-                    .padding(12)
+                    .padding(16)
                     .background(Color.orange.opacity(0.1))
                     .cornerRadius(8)
             } else if item.status == .completed {
                 Text("Great job completing this item! Consider adding a reflection on what you learned.")
-                    .font(.callout)
+                    .font(.subheadline)
                     .foregroundColor(.green)
-                    .padding(12)
+                    .padding(16)
                     .background(Color.green.opacity(0.1))
                     .cornerRadius(8)
             }
@@ -198,7 +198,7 @@ struct EnhancedItemDetailView: View {
     private var capturesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Linked Captures")
-                .font(.headline)
+                .font(.title3.weight(.medium))
             
             LazyVStack(spacing: 8) {
                 ForEach(item.captures) { capture in
@@ -211,7 +211,7 @@ struct EnhancedItemDetailView: View {
     private var quickActionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Quick Actions")
-                .font(.headline)
+                .font(.title3.weight(.medium))
             
             HStack(spacing: 12) {
                 ActionButton(
@@ -263,7 +263,7 @@ struct EnhancedItemDetailView: View {
             }
             
             Text(item.status.displayName)
-                .font(.caption2.weight(.medium))
+                .font(.caption.weight(.medium))
                 .foregroundColor(statusColor)
         }
     }
@@ -317,7 +317,7 @@ struct ContentSection: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Label(title, systemImage: icon)
-                    .font(.headline)
+                    .font(.title3.weight(.medium))
                 
                 Spacer()
                 
@@ -346,18 +346,18 @@ struct ContentSection: View {
             } else {
                 if !content.isEmpty {
                     Text(content)
-                        .font(.body)
+                        .font(.subheadline)
                         .textSelection(.enabled)
-                        .padding(12)
+                        .padding(16)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Color(NSColor.controlBackgroundColor))
                         .cornerRadius(8)
                 } else {
                     Text(placeholder)
-                        .font(.body)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                         .italic()
-                        .padding(12)
+                        .padding(16)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Color(NSColor.controlBackgroundColor))
                         .cornerRadius(8)
@@ -379,16 +379,16 @@ struct EnhancedCaptureRowView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(capture.title)
-                    .font(.subheadline.weight(.medium))
+                    .font(.headline.weight(.medium))
                 
                 HStack {
                     Text(capture.timestamp, style: .time)
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                     
                     if !capture.displayDuration.isEmpty {
                         Text("• \(capture.displayDuration)")
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
                     
@@ -404,7 +404,7 @@ struct EnhancedCaptureRowView: View {
             .buttonStyle(.bordered)
             .controlSize(.small)
         }
-        .padding(12)
+        .padding(16)
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(8)
     }

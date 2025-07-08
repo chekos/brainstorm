@@ -46,7 +46,7 @@ struct RichProgressCard: View {
                 // Content
                 VStack(alignment: .leading, spacing: 6) {
                     Text(item.title)
-                        .font(.headline)
+                        .font(.title3.weight(.medium))
                         .foregroundColor(isSelected ? .white : .primary)
                         .multilineTextAlignment(.leading)
                     
@@ -79,7 +79,7 @@ struct RichProgressCard: View {
                 completionInfo(completedAt)
             }
         }
-        .padding(16)
+        .padding(20)
     }
     
     private var statusIndicator: some View {
@@ -87,7 +87,7 @@ struct RichProgressCard: View {
             ZStack {
                 Circle()
                     .stroke(statusColor, lineWidth: 2)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 28, height: 28)
                 
                 if item.status == .completed {
                     Image(systemName: "checkmark")
@@ -96,7 +96,7 @@ struct RichProgressCard: View {
                 } else if item.status == .inProgress {
                     Circle()
                         .fill(statusColor)
-                        .frame(width: 12, height: 12)
+                        .frame(width: 14, height: 14)
                 }
             }
         }
@@ -106,9 +106,9 @@ struct RichProgressCard: View {
     private var pageReference: some View {
         HStack(spacing: 4) {
             Image(systemName: "book.pages")
-                .font(.caption2)
-            Text(formatPageReference())
                 .font(.caption)
+            Text(formatPageReference())
+                .font(.subheadline)
         }
         .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
     }
@@ -116,18 +116,18 @@ struct RichProgressCard: View {
     private var captureIndicator: some View {
         HStack(spacing: 4) {
             Image(systemName: "link")
-                .font(.caption2)
-            Text("\(item.captures.count)")
                 .font(.caption)
+            Text("\(item.captures.count)")
+                .font(.subheadline)
         }
         .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
     }
     
     private var statusBadge: some View {
         Text(item.status.displayName)
-            .font(.caption2.weight(.medium))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
+            .font(.caption.weight(.medium))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
             .background(statusColor.opacity(isSelected ? 0.3 : 0.15))
             .foregroundColor(isSelected ? .white : statusColor)
             .cornerRadius(12)
@@ -137,19 +137,19 @@ struct RichProgressCard: View {
         VStack(alignment: .leading, spacing: 6) {
             if let notes = item.notes, !notes.isEmpty {
                 Text(notes)
-                    .font(.caption)
-                    .lineLimit(2)
+                    .font(.subheadline)
+                    .lineLimit(3)
                     .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
             }
             
             if let reflection = item.reflection, !reflection.isEmpty {
                 Label {
                     Text(reflection)
-                        .font(.caption)
-                        .lineLimit(1)
+                        .font(.subheadline)
+                        .lineLimit(2)
                 } icon: {
                     Image(systemName: "lightbulb.min")
-                        .font(.caption2)
+                        .font(.caption)
                 }
                 .foregroundColor(isSelected ? .white.opacity(0.7) : .secondary)
             }

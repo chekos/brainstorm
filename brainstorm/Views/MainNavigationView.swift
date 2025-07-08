@@ -15,6 +15,7 @@ struct MainNavigationView: View {
     @State private var selectedPacket: Packet?
     @State private var showingImportView = false
     @State private var showingCaptureHUD = false
+    @State private var showingAISettings = false
     
     @Environment(\.serviceContainer) private var serviceContainer
     
@@ -52,7 +53,7 @@ struct MainNavigationView: View {
                 // Packets list
                 VStack(alignment: .leading, spacing: 0) {
                     Text("Packets")
-                        .font(.headline)
+                        .font(.title3.weight(.medium))
                         .foregroundColor(.secondary)
                         .padding(.horizontal)
                         .padding(.bottom, 8)
@@ -93,9 +94,15 @@ struct MainNavigationView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
-                    .padding(.horizontal)
-                    .padding(.bottom)
+                    
+                    Button(action: { showingAISettings = true }) {
+                        Label("AI Settings", systemImage: "brain")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
                 }
+                .padding(.horizontal)
+                .padding(.bottom)
             }
             .navigationTitle("Workbench")
 #if os(macOS)
@@ -127,6 +134,8 @@ struct MainNavigationView: View {
                 selectedPacket = packet
                 showingImportView = false
             }
+            .frame(minWidth: 500, minHeight: 400)
+            .frame(idealWidth: 600, idealHeight: 500)
         }
         .sheet(isPresented: $showingCaptureHUD) {
             if let services = serviceContainer {
@@ -136,7 +145,25 @@ struct MainNavigationView: View {
                     brainstormService: services.brainstormService,
                     hotkeyService: services.hotkeyService
                 )
+                .frame(minWidth: 400, minHeight: 600)
+                .frame(idealWidth: 450, idealHeight: 650)
+                .onDisappear {
+                    // Clean up any service references when the sheet is dismissed
+                    showingCaptureHUD = false
+                }
+            } else {
+                Text("Services not available")
+                    .padding()
+                    .frame(minWidth: 300, minHeight: 200)
+                    .onAppear {
+                        showingCaptureHUD = false
+                    }
             }
+        }
+        .sheet(isPresented: $showingAISettings) {
+            AISettingsView()
+                .frame(minWidth: 500, minHeight: 400)
+                .frame(idealWidth: 600, idealHeight: 500)
         }
     }
     
@@ -173,6 +200,7 @@ struct NavigationButton: View {
                 Image(systemName: icon)
                     .foregroundColor(isSelected ? .white : .primary)
                 Text(title)
+                    .font(.subheadline.weight(.medium))
                     .foregroundColor(isSelected ? .white : .primary)
                 Spacer()
             }
@@ -197,20 +225,20 @@ struct PacketRowView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(packet.title)
-                        .font(.subheadline)
+                        .font(.headline)
                         .foregroundColor(isSelected ? .white : .primary)
                         .lineLimit(1)
                     
                     HStack {
                         Text("\(packet.checklistItems.count) items")
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
                         
                         Spacer()
                         
                         if packet.progress > 0 {
                             Text("\(Int(packet.progress * 100))%")
-                                .font(.caption)
+                                .font(.subheadline)
                                 .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
                         }
                     }
@@ -221,7 +249,7 @@ struct PacketRowView: View {
                 if packet.isCompleted {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(isSelected ? .white : .green)
-                        .font(.caption)
+                        .font(.subheadline)
                 }
             }
             .padding(.horizontal, 12)

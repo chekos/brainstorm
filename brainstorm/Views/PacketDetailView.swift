@@ -21,12 +21,13 @@ struct PacketDetailView: View {
         HSplitView {
             // Enhanced checklist view with rich progress cards
             enhancedChecklistView
-                .frame(minWidth: 350)
+                .frame(minWidth: 350, maxWidth: .infinity, maxHeight: .infinity)
             
             // Enhanced detail view
             enhancedDetailView
-                .frame(minWidth: 450)
+                .frame(minWidth: 450, maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle(packet.title)
         .toolbar {
             ToolbarItemGroup {
@@ -70,13 +71,13 @@ struct PacketDetailView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Overview card
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: 20) {
                     PacketOverviewCard(packet: packet)
-                        .padding(.horizontal)
-                        .padding(.top)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
                     
                     // Rich progress cards
-                    LazyVStack(spacing: 12) {
+                    LazyVStack(spacing: 16) {
                         ForEach(sortedItems) { item in
                             RichProgressCard(
                                 item: item,
@@ -86,11 +87,13 @@ struct PacketDetailView: View {
                             )
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private var enhancedDetailView: some View {
@@ -98,13 +101,16 @@ struct PacketDetailView: View {
             if let item = selectedItem {
                 EnhancedItemDetailView(item: item, packet: packet)
             } else {
+                Spacer()
                 EmptyStateView(
                     title: "Select an Item",
                     description: "Choose an item from the progress cards to view its details, add notes, and track your progress.",
                     systemImage: "checkmark.circle.dashed"
                 )
+                Spacer()
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private var checklistView: some View {
