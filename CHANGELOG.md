@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SwiftData circular reference errors in model relationships
 - Platform-specific UI issues (iOS-only navigation modifiers on macOS)
 - Color system compatibility issues between iOS and macOS
+- VoiceService macOS compatibility (removed iOS-specific AVAudioSession APIs)
+- HotkeyService Carbon API type conversion errors for global shortcuts
+- SwiftData import issues in CaptureHUD for FetchDescriptor usage
+- @MainActor isolation for SFSpeechRecognizerDelegate protocol compliance
 
 ### Removed
 - Basic Item.swift model (replaced with comprehensive models)
